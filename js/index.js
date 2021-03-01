@@ -6,7 +6,6 @@ L.mapbox.accessToken = 'pk.eyJ1IjoiZG5vbWFkYiIsImEiOiJjaW16aXFsZzUwNHJmdjdra3h0N
 
 var map = L.map('map', {
   worldCopyJump: true,
-  doubleClickZoom: false,
   center: [38, -120],
   zoom: 13,
 });
@@ -87,11 +86,6 @@ elevWorker.addEventListener('message', function (response) {
 
 elevTiles.addTo(map);
 
-
-map.touchZoom.disable();
-map.doubleClickZoom.disable();
-
-
 function formatElev(elev) {
   return Math.round(elev) + ' m';
 }
@@ -99,10 +93,18 @@ function formatTemp(temp) {
   return Math.round(temp) + '° f';
 }
 
-L.easyButton('fa-water', function () {
-  const url = new URL(location);
-  const newHeight = window.prompt("New sea level in metres:", elev_filter);
-  if (newHeight == null) return;
-  url.searchParams.set('elev', newHeight);
-  location = url;
+L.easyButton({
+  states: [
+    {
+      icon: 'fa-water',
+      title: "Change sea level height",
+      onClick() {
+        const url = new URL(location);
+        const newHeight = window.prompt("New sea level in metres:", elev_filter);
+        if (newHeight == null) return;
+        url.searchParams.set('elev', newHeight);
+        location = url;
+      }
+    }
+  ]
 }).addTo(map);
