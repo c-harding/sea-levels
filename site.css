@@ -39,3 +39,7 @@ body {
 .chart-elevation-circle {
     background: red;
 }
+
+.easy-button-button .fa {
+  line-height: unset;
+}

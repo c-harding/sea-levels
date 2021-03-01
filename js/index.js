@@ -18,7 +18,7 @@ var elevTiles = new L.TileLayer.Canvas({
   attribution: '<a href="http://www.mapbox.com/about/maps/" target="_blank">Terms &amp; Feedback</a>'
 });
 
-var hash = L.hash(map);
+L.hash(map);
 
 elevTiles.on('tileunload', function (e) {
   //Send tile unload data to elevWorker to delete un-needed pixel data
@@ -29,19 +29,8 @@ var elevWorker = new Worker('js/imagedata.js');
 
 var tileContextsElev = {};
 
-var locs = location.search.split('?');
-
-if (locs.length > 1) {
-  locs = locs[1].split('=');
-} else {
-  locs = ['no']
-}
-
-if (locs[0] == 'elev') {
-  elev_filter = parseInt(locs[1]);
-} else {
-  elev_filter = 10;
-}
+var elev_filter = parseInt(new URL(location).searchParams.get('elev'));
+if (isNaN(elev_filter)) elev_filter = 10;
 
 elevWorker.postMessage({
   data: elev_filter,
@@ -109,3 +98,11 @@ function formatElev(elev) {
 function formatTemp(temp) {
   return Math.round(temp) + '° f';
 }
+
+L.easyButton('fa-water', function () {
+  const url = new URL(location);
+  const newHeight = window.prompt("New sea level in metres:", elev_filter);
+  if (newHeight == null) return;
+  url.searchParams.set('elev', newHeight);
+  location = url;
+}).addTo(map);
