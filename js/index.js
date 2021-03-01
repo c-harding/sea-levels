@@ -1,10 +1,10 @@
-var tileSize,
+let tileSize,
   everyOther = true,
   drawElev = false;
 
 L.mapbox.accessToken = 'pk.eyJ1IjoiZG5vbWFkYiIsImEiOiJjaW16aXFsZzUwNHJmdjdra3h0Nmd2cjY1In0.SqzkaKalXxQaPhQLjodQcQ';
 
-var map = L.map('map', {
+const map = L.map('map', {
   worldCopyJump: true,
   center: [38, -120],
   zoom: 13,
@@ -12,7 +12,7 @@ var map = L.map('map', {
 
 L.mapbox.styleLayer('mapbox://styles/mapbox/outdoors-v11').addTo(map);
 
-var elevTiles = new L.TileLayer.Canvas({
+const elevTiles = new L.TileLayer.Canvas({
   unloadInvisibleTiles: true,
   attribution: '<a href="http://www.mapbox.com/about/maps/" target="_blank">Terms &amp; Feedback</a>'
 });
@@ -24,11 +24,11 @@ elevTiles.on('tileunload', function (e) {
   elevWorker.postMessage({ 'data': e.tile._tilePoint.id, 'type': 'tileunload' });
 });
 
-var elevWorker = new Worker('js/imagedata.js');
+const elevWorker = new Worker('js/imagedata.js');
 
-var tileContextsElev = {};
+const tileContextsElev = {};
 
-var elev_filter = parseFloat(new URL(location).searchParams.get('elev'));
+let elev_filter = parseFloat(new URL(location).searchParams.get('elev'));
 if (isNaN(elev_filter)) elev_filter = 10;
 
 elevWorker.postMessage({
@@ -40,23 +40,21 @@ elevWorker.postMessage({
 elevTiles.drawTile = function (canvas, tile, zoom) {
   tileSize = this.options.tileSize;
 
-  var context = canvas.getContext('2d'),
+  const context = canvas.getContext('2d'),
     imageObj = new Image(),
     tileUID = '' + zoom + '/' + tile.x + '/' + tile.y;
-
-  var drawContext = canvas.getContext('2d');
 
   // To access / delete elevTiles later
   tile.id = tileUID;
 
-  tileContextsElev[tileUID] = drawContext;
+  tileContextsElev[tileUID] = context;
 
   imageObj.onload = function () {
     // Draw Image Tile
     context.drawImage(imageObj, 0, 0);
 
     // Get Image Data
-    var imageData = context.getImageData(0, 0, tileSize, tileSize);
+    const imageData = context.getImageData(0, 0, tileSize, tileSize);
 
     elevWorker.postMessage({
       data: {
@@ -78,7 +76,7 @@ elevTiles.drawTile = function (canvas, tile, zoom) {
 
 elevWorker.addEventListener('message', function (response) {
   if (response.data.type === 'tiledata') {
-    var dispData = tileContextsElev[response.data.data.tileUID].createImageData(tileSize, tileSize);
+    const dispData = tileContextsElev[response.data.data.tileUID].createImageData(tileSize, tileSize);
     dispData.data.set(response.data.data.array);
     tileContextsElev[response.data.data.tileUID].putImageData(dispData, 0, 0);
   }
@@ -104,6 +102,19 @@ L.easyButton({
         if (newHeight == null) return;
         url.searchParams.set('elev', newHeight);
         location = url;
+      }
+    }
+  ]
+}).addTo(map);
+
+
+L.easyButton({
+  states: [
+    {
+      icon: 'fa-github fab',
+      title: "GitHub",
+      onClick() {
+        window.open("https://www.github.com/c-harding/sea-levels/", '_blank');
       }
     }
   ]
