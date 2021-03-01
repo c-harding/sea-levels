@@ -29,7 +29,7 @@ var elevWorker = new Worker('js/imagedata.js');
 
 var tileContextsElev = {};
 
-var elev_filter = parseInt(new URL(location).searchParams.get('elev'));
+var elev_filter = parseFloat(new URL(location).searchParams.get('elev'));
 if (isNaN(elev_filter)) elev_filter = 10;
 
 elevWorker.postMessage({
